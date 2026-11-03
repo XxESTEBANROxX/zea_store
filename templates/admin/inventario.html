@@ -1,0 +1,354 @@
+{% extends "admin/base.html" %}
+
+{% block titulo %}Inventario{% endblock %}
+
+{% block estilos %}
+  <link rel="stylesheet" href="/css/admin/inventario.css">
+{% endblock %}
+
+
+{% block cuerpo %}
+
+  {# Textos de cada estado de stock #}
+  {% set etiquetas = {'ok': 'Normal', 'bajo': 'Stock bajo', 'agotado': 'Agotado'} %}
+
+
+  <!-- ======================= BARRA SUPERIOR ======================= -->
+  <header class="barra">
+    <div class="contenedor barra-fila">
+
+      <a class="marca" href="/admin/inventario">
+        <img class="logo" src="/logo.jpg" alt="">
+        <span>ZEA STORE <small>Administrador</small></span>
+      </a>
+
+      <div class="barra-acciones">
+
+        <a class="ic" href="/" target="_blank" rel="noopener"
+           aria-label="Ver el catálogo público" title="Ver el catálogo">
+          <i class="fa-solid fa-store"></i>
+        </a>
+
+        <button id="th" class="ic" type="button" aria-label="Cambiar entre modo claro y oscuro"></button>
+
+        <!-- Cerrar sesión: es un formulario para que no se pueda activar con un simple enlace -->
+        <form method="post" action="{{ url_for('admin.salir') }}">
+          <button class="ic" type="submit" aria-label="Cerrar sesión" title="Cerrar sesión">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </header>
+
+
+  <main class="contenedor principal">
+
+    <!-- Encabezado de la página -->
+    <div class="encabezado">
+      <div>
+        <h1>Inventario</h1>
+        <p class="texto-suave">Productos, existencias y precios de ZEA STORE.</p>
+      </div>
+
+      <button id="btn-agregar" class="boton" type="button">
+        <i class="fa-solid fa-plus"></i> Agregar producto
+      </button>
+    </div>
+
+    {% if error_bd %}
+      <p class="alerta" role="alert">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        No se pudo leer la base de datos. Revisa la conexión con Supabase.
+      </p>
+    {% endif %}
+
+
+    <!-- ======================= RESUMEN ======================= -->
+    <section class="resumen" aria-label="Resumen del inventario">
+
+      <article class="dato">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <strong>{{ resumen.referencias }}</strong>
+        <span>Productos</span>
+      </article>
+
+      <article class="dato">
+        <i class="fa-solid fa-cubes"></i>
+        <strong>{{ resumen.unidades }}</strong>
+        <span>Unidades en stock</span>
+      </article>
+
+      <article class="dato {% if resumen.bajos + resumen.agotados %}dato-alerta{% endif %}">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <strong>{{ resumen.bajos + resumen.agotados }}</strong>
+        <span>Stock bajo o agotado</span>
+      </article>
+
+      <article class="dato">
+        <i class="fa-solid fa-sack-dollar"></i>
+        <strong>{{ resumen.costo|cop }}</strong>
+        <span>Costo del inventario</span>
+      </article>
+
+    </section>
+
+
+    <!-- ======================= HERRAMIENTAS ======================= -->
+    <section class="herramientas" aria-label="Buscar y filtrar">
+
+      <label class="buscador">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="buscar" type="search" class="entrada"
+               placeholder="Buscar por nombre, SKU o marca…" aria-label="Buscar productos">
+      </label>
+
+      <select id="filtro-categoria" class="entrada" aria-label="Filtrar por categoría">
+        <option value="">Todas las categorías</option>
+        {% for c in categorias %}
+          <option value="{{ c.nombre }}">{{ c.nombre }}</option>
+        {% endfor %}
+      </select>
+
+      <div class="chips" role="group" aria-label="Filtrar por estado">
+        <button class="chip" type="button" data-estado="todos"   aria-pressed="true">Todos</button>
+        <button class="chip" type="button" data-estado="bajo"    aria-pressed="false">Stock bajo</button>
+        <button class="chip" type="button" data-estado="agotado" aria-pressed="false">Agotados</button>
+      </div>
+
+    </section>
+
+    <p id="contador" class="texto-suave" aria-live="polite"></p>
+
+
+    <!-- ======================= TABLA DE PRODUCTOS ======================= -->
+    <div class="tabla-caja">
+      <table class="tabla">
+
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>Stock</th>
+            <th>Compra</th>
+            <th>Venta</th>
+            <th>Ganancia</th>
+            <th>Catálogo</th>
+            <th><span class="solo-lectores">Acciones</span></th>
+          </tr>
+        </thead>
+
+        <tbody id="cuerpo-tabla">
+          {% for p in productos %}
+
+            {# data-producto guarda todos los datos para llenar el formulario de editar #}
+            <tr class="fila"
+                data-categoria="{{ p.categoria }}"
+                data-estado="{{ p.estado }}"
+                data-texto="{{ p.nombre }} {{ p.sku }} {{ p.marca }} {{ p.categoria }}"
+                data-producto='{{ p|tojson }}'>
+
+              <td class="celda-producto">
+                <div class="producto">
+                  {% if p.imagen %}
+                    <img class="miniatura" src="{{ p.imagen }}" alt="" loading="lazy">
+                  {% else %}
+                    <span class="miniatura" aria-hidden="true">{{ p.emoji }}</span>
+                  {% endif %}
+
+                  <div>
+                    <strong class="nombre">{{ p.nombre }}</strong>
+                    <span class="sku">{{ p.sku }}{% if p.marca %} · {{ p.marca }}{% endif %}</span>
+                  </div>
+                </div>
+              </td>
+
+              <td data-label="Categoría">{{ p.categoria or "—" }}</td>
+
+              <td data-label="Stock">
+                <div class="stock">
+                  <div class="paso-caja">
+                    <button class="paso" type="button" aria-label="Restar una unidad">
+                      <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span class="stock-valor">{{ p.stock }}</span>
+                    <button class="paso" type="button" aria-label="Sumar una unidad">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                  <span class="estado estado-{{ p.estado }}">{{ etiquetas[p.estado] }}</span>
+                </div>
+              </td>
+
+              <td class="precio" data-label="Compra">{{ p.precio_compra|cop }}</td>
+              <td class="precio" data-label="Venta">{{ p.precio_venta|cop }}</td>
+              <td class="precio" data-label="Ganancia">{{ p.ganancia|cop }}</td>
+
+              <td data-label="Catálogo">
+                {% if p.visible %}
+                  <span class="etiqueta-vis visible"><i class="fa-solid fa-eye"></i> Visible</span>
+                {% else %}
+                  <span class="etiqueta-vis"><i class="fa-solid fa-eye-slash"></i> Oculto</span>
+                {% endif %}
+              </td>
+
+              <td class="celda-acciones">
+                <div class="acciones">
+                  <button class="ic ic-chico" type="button" data-accion="editar"
+                          aria-label="Editar {{ p.nombre }}" title="Editar">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button class="ic ic-chico ic-peligro" type="button" data-accion="eliminar"
+                          aria-label="Eliminar {{ p.nombre }}" title="Eliminar">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+
+            </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+
+    <!-- Mensaje cuando no hay productos o los filtros no encuentran ninguno -->
+    <p id="sin-resultados" class="vacio" hidden>
+      No hay productos para mostrar con esos filtros.
+    </p>
+
+  </main>
+
+
+  <!-- ======================= VENTANA: AGREGAR / EDITAR ======================= -->
+  <dialog id="dlg-producto" class="ventana" aria-labelledby="titulo-ventana">
+    <form id="form-producto" class="ventana-contenido">
+
+      <div class="ventana-cabeza">
+        <h2 id="titulo-ventana">Agregar producto</h2>
+        <button class="ic ic-chico" type="button" data-cerrar aria-label="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="ventana-cuerpo">
+
+        <input type="hidden" name="id">
+
+        <!-- Foto: se puede arrastrar o elegir, y se ve una vista previa -->
+        <label class="zona-foto" for="foto">
+          <img id="vista-previa" alt="Vista previa de la foto" hidden>
+          <span id="foto-texto">
+            <i class="fa-solid fa-image"></i>
+            Arrastra una foto aquí o toca para elegirla
+            <small>JPG, PNG o WEBP</small>
+          </span>
+        </label>
+        <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp" class="solo-lectores">
+
+        <div class="rejilla">
+
+          <div class="campo-form completo">
+            <label class="etiqueta" for="f-nombre">Nombre del producto</label>
+            <input id="f-nombre" name="nombre" class="entrada" type="text" required>
+          </div>
+
+          <div class="campo-form">
+            <label class="etiqueta" for="f-sku">SKU (código único)</label>
+            <input id="f-sku" name="sku" class="entrada" type="text" required>
+          </div>
+
+          <div class="campo-form">
+            <label class="etiqueta" for="f-marca">Marca</label>
+            <input id="f-marca" name="marca" class="entrada" type="text">
+          </div>
+
+          <div class="campo-form completo">
+            <label class="etiqueta" for="f-categoria">Categoría</label>
+            <select id="f-categoria" name="categoria_id" class="entrada">
+              <option value="">Sin categoría</option>
+              {% for c in categorias %}
+                <option value="{{ c.id }}">{{ c.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="campo-form completo">
+            <label class="etiqueta" for="f-descripcion">Descripción</label>
+            <textarea id="f-descripcion" name="descripcion" class="entrada" rows="3"></textarea>
+          </div>
+
+          <div class="campo-form">
+            <label class="etiqueta" for="f-compra">Precio de compra (COP)</label>
+            <input id="f-compra" name="precio_compra" class="entrada" type="number" min="0" step="1" inputmode="numeric" value="0">
+          </div>
+
+          <div class="campo-form">
+            <label class="etiqueta" for="f-venta">Precio de venta (COP)</label>
+            <input id="f-venta" name="precio_venta" class="entrada" type="number" min="0" step="1" inputmode="numeric" value="0">
+          </div>
+
+          <div class="campo-form">
+            <label class="etiqueta" for="f-stock">Stock actual</label>
+            <input id="f-stock" name="stock" class="entrada" type="number" min="0" step="1" inputmode="numeric" value="0">
+          </div>
+
+          <div class="campo-form">
+            <label class="etiqueta" for="f-minimo">Stock mínimo (aviso)</label>
+            <input id="f-minimo" name="stock_minimo" class="entrada" type="number" min="0" step="1" inputmode="numeric" value="0">
+          </div>
+
+        </div>
+
+        <!-- Interruptor: mostrar o no en el catálogo público -->
+        <label class="interruptor">
+          <input type="checkbox" name="visible_catalogo" checked>
+          <span class="interruptor-barra" aria-hidden="true"></span>
+          <span>
+            <strong>Mostrar en el catálogo público</strong>
+            <small>Si lo apagas, el producto queda solo en el inventario.</small>
+          </span>
+        </label>
+
+        <p id="aviso-guardado" class="alerta" hidden>
+          Vista previa: el guardado se conecta en el siguiente paso.
+        </p>
+
+      </div>
+
+      <div class="ventana-pie">
+        <button class="boton boton-sec" type="button" data-cerrar>Cancelar</button>
+        <button class="boton" type="submit">Guardar</button>
+      </div>
+
+    </form>
+  </dialog>
+
+
+  <!-- ======================= VENTANA: CONFIRMAR ELIMINAR ======================= -->
+  <dialog id="dlg-eliminar" class="ventana ventana-chica" aria-labelledby="titulo-eliminar">
+    <div class="ventana-contenido">
+
+      <div class="ventana-cabeza">
+        <h2 id="titulo-eliminar">¿Eliminar producto?</h2>
+      </div>
+
+      <div class="ventana-cuerpo">
+        <p>Vas a eliminar <strong id="nombre-eliminar"></strong>. Esta acción no se puede deshacer.</p>
+      </div>
+
+      <div class="ventana-pie">
+        <button class="boton boton-sec" type="button" data-cerrar>Cancelar</button>
+        <button class="boton boton-peligro" type="button" id="confirmar-eliminar">Eliminar</button>
+      </div>
+
+    </div>
+  </dialog>
+
+{% endblock %}
+
+
+{% block scripts %}
+  <script src="/js/admin/inventario.js"></script>
+{% endblock %}

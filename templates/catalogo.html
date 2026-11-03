@@ -1,38 +1,130 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ZEA STORE · Catálogo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/catalogo.css"></head>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>ZEA STORE · Catálogo</title>
+
+  <!-- Ícono de la pestaña del navegador -->
+  <link rel="icon" href="/zea_store_favicon.ico" type="image/x-icon">
+
+  <!-- Tipografía (Google Fonts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Íconos de redes sociales (Font Awesome) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Estilos del catálogo -->
+  <link rel="stylesheet" href="/css/catalogo.css">
+</head>
+
 <body>
-<header class="top"><div class="wrap bar">
-  <a class="brand" href="#"><img class="logo" src="/logo.jpg" alt="Logo de ZEA STORE"><span>ZEA STORE</span></a>
-  <label class="search"><input id="q" type="search" placeholder="Buscar celulares, accesorios, marcas…" aria-label="Buscar productos"></label>
-  <button id="th" class="ic" type="button" aria-label="Cambiar entre modo claro y oscuro"></button>
-</div></header>
-<main class="wrap">
-  <h1>Catálogo</h1>
-  <p class="lead">Celulares, accesorios y tecnología. Escríbenos por WhatsApp para conocer el precio y la disponibilidad de cada producto.</p>
-  <div class="filters">
-    <div class="chips" id="cats" role="group" aria-label="Categorías"></div>
-    <div class="seg" id="avail" role="group" aria-label="Disponibilidad"></div>
-  </div>
-  <p class="count" id="count" aria-live="polite"></p>
-  <section class="grid" id="grid"></section>
-</main>
-<footer><div class="wrap">
-  {% if wa_number and 'X' not in wa_number %}<span>WhatsApp: +{{ wa_number }}</span>{% endif %}
-  {% if direccion %}<span>Dirección: {{ direccion }}</span>{% endif %}
-  {% if horario %}<span>Horario: {{ horario }}</span>{% endif %}
-</div></footer>
-<script>
-  // Datos que Flask le entrega al JavaScript
-  window.ZEA = {
-    waNumber: {{ wa_number|tojson }},
-    categorias: {{ categorias|tojson }},
-    productos: {{ productos|tojson }}
-  };
-</script>
-<script src="/js/catalogo.js"></script>
-</body></html>
+
+  <!-- ENCABEZADO: logo, buscador y botón de modo claro/oscuro -->
+  <header class="top">
+    <div class="wrap bar">
+
+      <a class="brand" href="/">
+        <img class="logo" src="/logo.jpg" alt="Logo de ZEA STORE">
+        <span>ZEA STORE</span>
+      </a>
+
+      <label class="search">
+        <input id="q" type="search" placeholder="Buscar celulares, accesorios, marcas…" aria-label="Buscar productos">
+      </label>
+
+      <button id="th" class="ic" type="button" aria-label="Cambiar entre modo claro y oscuro"></button>
+
+    </div>
+  </header>
+
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="wrap">
+
+    <!-- Título (imagen) y texto de introducción -->
+    <h1 class="titulo">
+      <img src="/titulo-catalogo.png" alt="Catálogo" width="1000" height="247">
+    </h1>
+    <p class="lead">
+      Celulares, accesorios y tecnología. Escríbenos por WhatsApp para conocer el precio y la disponibilidad de cada producto.
+    </p>
+
+    <!-- Filtros: categorías y disponibilidad (los botones los crea catalogo.js) -->
+    <div class="filters">
+      <div class="chips" id="cats" role="group" aria-label="Categorías"></div>
+      <div class="seg" id="avail" role="group" aria-label="Disponibilidad"></div>
+    </div>
+
+    <!-- Cantidad de productos encontrados -->
+    <p class="count" id="count" aria-live="polite"></p>
+
+    <!-- Tarjetas de productos (las crea catalogo.js) -->
+    <section class="grid" id="grid"></section>
+
+  </main>
+
+
+  <!-- PIE DE PÁGINA: contacto, redes sociales, dirección y horario.
+  Solo muestra lo que esté configurado en Vercel -->
+  <footer>
+    <div class="wrap">
+
+      <h2 class="footer-titulo">Contáctanos</h2>
+
+      <!-- Botones de contacto: ícono + texto -->
+      <div class="contactos">
+
+        {% if wa_number and 'X' not in wa_number %}
+          <a class="contacto" href="https://wa.me/{{ wa_number }}" target="_blank" rel="noopener">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span>WhatsApp: +{{ wa_number }}</span>
+          </a>
+        {% endif %}
+
+        <a class="contacto" href="https://www.instagram.com/TU_USUARIO" target="_blank" rel="noopener">
+          <i class="fa-brands fa-instagram"></i>
+          <span>Instagram</span>
+        </a>
+
+        <a class="contacto" href="https://www.tiktok.com/@TU_USUARIO" target="_blank" rel="noopener">
+          <i class="fa-brands fa-tiktok"></i>
+          <span>TikTok</span>
+        </a>
+
+      </div>
+
+      <!-- Dirección y horario de la tienda -->
+      {% if direccion or horario %}
+        <div class="datos-tienda">
+          {% if direccion %}
+            <p>Dirección: {{ direccion }}</p>
+          {% endif %}
+
+          {% if horario %}
+            <p>Horario: {{ horario }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
+
+    </div>
+  </footer>
+
+
+  <!-- DATOS: Flask se los entrega al JavaScript -->
+  <script>
+    window.ZEA = {
+      waNumber:   {{ wa_number|tojson }},
+      categorias: {{ categorias|tojson }},
+      productos:  {{ productos|tojson }}
+    };
+  </script>
+
+  <!-- Lógica del catálogo -->
+  <script src="/js/catalogo.js"></script>
+
+</body>
+</html>

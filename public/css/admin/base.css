@@ -1,0 +1,230 @@
+/* ==========================================================================
+   ZEA STORE · Panel de administración · Colores y componentes compartidos
+   Lo usan el login y el inventario.
+   Orden del archivo:
+     1. Colores (modo claro y modo oscuro)
+     2. Base de la página
+     3. Botones y campos compartidos
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. COLORES (mismos tonos del catálogo, más el amarillo de "stock bajo")
+   ========================================================================== */
+
+/* Modo claro (el que se usa por defecto) */
+:root {
+  --bg:      #FAF7FF;   /* fondo de la página */
+  --sf:      #FFFFFF;   /* fondo de tarjetas, tablas y campos */
+  --sf2:     #F0E8FF;   /* fondo suave (miniaturas, filas al pasar el mouse) */
+  --tx:      #1A0F2E;   /* texto principal */
+  --mu:      #6B5B85;   /* texto secundario */
+  --pr:      #8E2DE2;   /* violeta principal (botones) */
+  --gl:      #B65CFF;   /* violeta neón (brillos y foco) */
+  --ok:      #12805C;   /* verde: stock normal / visible */
+  --okbg:    #D9F5EA;
+  --warn:    #8A5A00;   /* amarillo: stock bajo */
+  --warnbg:  #FFF1CF;
+  --no:      #B3261E;   /* rojo: agotado / eliminar / errores */
+  --nobg:    #FBE3E1;
+  --ln:      #E3D6F5;   /* líneas y bordes */
+  --sh:      0 1px 3px rgba(26, 15, 46, 0.08);   /* sombra de tarjetas */
+
+  /* Respeta las zonas seguras del celular (muesca y barra inferior) */
+  box-sizing: border-box;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Modo oscuro automático: si el dispositivo está en oscuro y no se eligió claro */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:      #0B0612;
+    --sf:      #1A0F2E;
+    --sf2:     #26163F;
+    --tx:      #FFFFFF;
+    --mu:      #B9A7D6;
+    --ok:      #5FE0B0;
+    --okbg:    #0F3A2C;
+    --warn:    #FFC857;
+    --warnbg:  #3F2D06;
+    --no:      #FF8A84;
+    --nobg:    #45171A;
+    --ln:      #32204F;
+    --sh:      0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+/* Modo oscuro manual: cuando se presiona el botón de sol/luna */
+:root[data-theme="dark"] {
+  --bg:      #0B0612;
+  --sf:      #1A0F2E;
+  --sf2:     #26163F;
+  --tx:      #FFFFFF;
+  --mu:      #B9A7D6;
+  --ok:      #5FE0B0;
+  --okbg:    #0F3A2C;
+  --warn:    #FFC857;
+  --warnbg:  #3F2D06;
+  --no:      #FF8A84;
+  --nobg:    #45171A;
+  --ln:      #32204F;
+  --sh:      0 0 0 rgba(0, 0, 0, 0);
+}
+
+
+/* ==========================================================================
+   2. BASE DE LA PÁGINA
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--tx);
+  font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+/* Hace que el atributo "hidden" siempre oculte, aunque otra regla diga lo contrario */
+[hidden] {
+  display: none !important;
+}
+
+/* Texto solo para lectores de pantalla (no se ve, pero se lee en voz alta) */
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Borde violeta visible al navegar con el teclado */
+:focus-visible {
+  outline: 2px solid var(--gl);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+
+/* ==========================================================================
+   3. BOTONES Y CAMPOS COMPARTIDOS
+   ========================================================================== */
+
+/* Botón redondo con ícono (tema, cerrar sesión, editar...) */
+.ic {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--ln);
+  border-radius: 50%;
+  background: var(--sf);
+  color: var(--tx);
+  font-size: 1.05rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.ic:hover {
+  border-color: var(--pr);
+  background: var(--sf2);
+}
+
+/* Botón principal violeta */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 22px;
+  border: 1px solid var(--pr);
+  border-radius: 999px;
+  background: var(--pr);
+  color: #FFFFFF;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.boton:hover {
+  background: var(--gl);
+  border-color: var(--gl);
+  color: #0B0612;
+  box-shadow: 0 0 16px rgba(182, 92, 255, 0.4);
+}
+
+/* Botón secundario: solo con borde */
+.boton-sec {
+  background: transparent;
+  color: var(--tx);
+  border-color: var(--ln);
+}
+
+.boton-sec:hover {
+  background: var(--sf2);
+  border-color: var(--pr);
+  color: var(--tx);
+  box-shadow: none;
+}
+
+/* Botón rojo para acciones que borran */
+.boton-peligro {
+  background: var(--no);
+  border-color: var(--no);
+  color: #FFFFFF;
+}
+
+.boton-peligro:hover {
+  background: var(--no);
+  border-color: var(--no);
+  color: #FFFFFF;
+  box-shadow: none;
+  filter: brightness(1.1);
+}
+
+/* Campos de formulario (texto, números, listas, párrafos) */
+.entrada {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--ln);
+  border-radius: 12px;
+  background: var(--sf);
+  color: var(--tx);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.entrada::placeholder {
+  color: var(--mu);
+}
+
+textarea.entrada {
+  resize: vertical;
+}
+
+/* Título pequeño encima de cada campo */
+.etiqueta {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}

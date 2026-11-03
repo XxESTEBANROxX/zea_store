@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+
+{% block titulo %}Iniciar sesión{% endblock %}
+
+{% block estilos %}
+  <link rel="stylesheet" href="/css/admin/login.css">
+{% endblock %}
+
+
+{% block cuerpo %}
+  <main class="login">
+
+    <!-- Botón de modo claro/oscuro (esquina superior derecha) -->
+    <button id="th" class="ic ic-esquina" type="button" aria-label="Cambiar entre modo claro y oscuro"></button>
+
+    <section class="tarjeta">
+
+      <img class="logo" src="/logo.jpg" alt="Logo de ZEA STORE">
+
+      <h1>Acceso administrador</h1>
+      <p class="subtitulo">Ingresa tus credenciales para gestionar el inventario.</p>
+
+      <!-- Mensaje de error (solo aparece si el login falló) -->
+      {% if error %}
+        <p class="error" role="alert">{{ error }}</p>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('admin.login') }}">
+
+        <label class="etiqueta" for="usuario">Usuario</label>
+        <div class="campo">
+          <i class="fa-solid fa-user"></i>
+          <input id="usuario" name="usuario" type="text" required autofocus
+                 autocomplete="username">
+        </div>
+
+        <label class="etiqueta" for="clave">Contraseña</label>
+        <div class="campo">
+          <i class="fa-solid fa-lock"></i>
+          <input id="clave" name="clave" type="password" required
+                 autocomplete="current-password">
+
+          <!-- Muestra u oculta la contraseña -->
+          <button id="ver-clave" class="ojo" type="button" aria-label="Mostrar contraseña">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+
+        <button class="boton" type="submit">Ingresar</button>
+
+      </form>
+
+    </section>
+
+  </main>
+{% endblock %}
+
+
+{% block scripts %}
+  <script src="/js/admin/login.js"></script>
+{% endblock %}

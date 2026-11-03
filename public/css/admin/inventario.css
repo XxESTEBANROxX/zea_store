@@ -1,0 +1,705 @@
+/* ==========================================================================
+   ZEA STORE · Panel de inventario
+   Orden del archivo:
+     1. Barra superior
+     2. Contenido y encabezado de la página
+     3. Tarjetas de resumen
+     4. Buscador y filtros
+     5. Tabla de productos (computador)
+     6. Tabla convertida en tarjetas (celular)
+     7. Etiquetas de estado y stock
+     8. Ventanas emergentes (agregar, editar, eliminar)
+     9. Formulario del producto
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. BARRA SUPERIOR (queda fija arriba)
+   ========================================================================== */
+
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding-top: env(safe-area-inset-top, 0px);
+  border-bottom: 1px solid var(--ln);
+  background: var(--bg);
+}
+
+/* Contenedor que centra el contenido y limita su ancho */
+.contenedor {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.barra-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Logo + nombre */
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--tx);
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.marca small {
+  display: block;
+  color: var(--mu);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.marca .logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #000000;
+  box-shadow: 0 0 0 2px var(--pr), 0 0 14px var(--gl);
+}
+
+/* Botones de la derecha (catálogo, tema, salir) */
+.barra-acciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.barra-acciones form {
+  margin: 0;
+}
+
+
+/* ==========================================================================
+   2. CONTENIDO Y ENCABEZADO DE LA PÁGINA
+   ========================================================================== */
+
+.principal {
+  padding-top: 24px;
+  padding-bottom: 48px;
+}
+
+/* Título "Inventario" y botón de agregar */
+.encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.encabezado h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.texto-suave {
+  margin: 4px 0 0;
+  color: var(--mu);
+  font-size: 0.9rem;
+}
+
+/* Aviso amarillo/rojo (errores y avisos) */
+.alerta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--warnbg);
+  color: var(--warn);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+
+/* ==========================================================================
+   3. TARJETAS DE RESUMEN
+   ========================================================================== */
+
+/* 2 columnas en celular, 4 en computador */
+.resumen {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 860px) {
+  .resumen {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px;
+  border: 1px solid var(--ln);
+  border-radius: 16px;
+  background: var(--sf);
+  box-shadow: var(--sh);
+}
+
+.dato > i {
+  margin-bottom: 6px;
+  color: var(--pr);
+  font-size: 1.2rem;
+}
+
+.dato strong {
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.dato span {
+  color: var(--mu);
+  font-size: 0.82rem;
+}
+
+/* La tarjeta de alertas se pinta de amarillo si hay productos con poco stock */
+.dato-alerta {
+  border-color: var(--warn);
+  background: var(--warnbg);
+}
+
+.dato-alerta > i,
+.dato-alerta strong {
+  color: var(--warn);
+}
+
+
+/* ==========================================================================
+   4. BUSCADOR Y FILTROS
+   ========================================================================== */
+
+.herramientas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+/* Buscador con lupa (ocupa toda la fila en celular) */
+.buscador {
+  position: relative;
+  flex: 1 1 100%;
+}
+
+.buscador > i {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  color: var(--mu);
+  pointer-events: none;
+}
+
+.buscador .entrada {
+  padding-left: 40px;
+  border-radius: 999px;
+}
+
+#filtro-categoria {
+  flex: 1 1 180px;
+  border-radius: 999px;
+}
+
+@media (min-width: 860px) {
+  .buscador {
+    flex: 1 1 320px;
+  }
+
+  #filtro-categoria {
+    flex: 0 0 220px;
+  }
+}
+
+/* Botones "Todos / Stock bajo / Agotados" */
+.chips {
+  display: flex;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--ln);
+  border-radius: 999px;
+  background: var(--sf);
+  color: var(--tx);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Filtro seleccionado */
+.chip[aria-pressed="true"] {
+  border-color: var(--pr);
+  background: var(--pr);
+  color: #FFFFFF;
+}
+
+
+/* ==========================================================================
+   5. TABLA DE PRODUCTOS (computador)
+   ========================================================================== */
+
+.tabla-caja {
+  overflow-x: auto;
+  border: 1px solid var(--ln);
+  border-radius: 16px;
+  background: var(--sf);
+  box-shadow: var(--sh);
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.tabla th {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ln);
+  color: var(--mu);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.tabla td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ln);
+  vertical-align: middle;
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tabla tbody tr:hover {
+  background: var(--sf2);
+}
+
+/* Contenido de la celda del producto: miniatura + nombre + SKU */
+.producto {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 240px;
+}
+
+/* Los precios no se parten en dos líneas */
+.precio {
+  white-space: nowrap;
+}
+
+.miniatura {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border: 1px solid var(--ln);
+  border-radius: 12px;
+  background: var(--sf2);
+  font-size: 1.5rem;
+  object-fit: cover;
+}
+
+.nombre {
+  display: block;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.sku {
+  display: block;
+  color: var(--mu);
+  font-size: 0.78rem;
+}
+
+/* Botones de editar y eliminar */
+.acciones {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.ic-chico {
+  width: 36px;
+  height: 36px;
+  font-size: 0.9rem;
+}
+
+.ic-peligro:hover {
+  border-color: var(--no);
+  background: var(--nobg);
+  color: var(--no);
+}
+
+/* Texto "No hay productos..." */
+.vacio {
+  padding: 40px 12px;
+  color: var(--mu);
+  text-align: center;
+}
+
+
+/* ==========================================================================
+   6. TABLA CONVERTIDA EN TARJETAS (celular)
+   Cada fila pasa a ser una tarjeta y cada dato muestra su nombre a la izquierda.
+   ========================================================================== */
+
+@media (max-width: 859px) {
+
+  .tabla-caja {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .tabla,
+  .tabla tbody {
+    display: block;
+  }
+
+  /* Los títulos de columna se esconden: ya se muestran dentro de cada tarjeta */
+  .tabla thead {
+    display: none;
+  }
+
+  .tabla tbody tr {
+    display: block;
+    margin-bottom: 12px;
+    padding: 14px;
+    border: 1px solid var(--ln);
+    border-radius: 16px;
+    background: var(--sf);
+    box-shadow: var(--sh);
+  }
+
+  .tabla td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--ln);
+  }
+
+  /* Nombre del dato a la izquierda (viene del atributo data-label del HTML) */
+  .tabla td[data-label]::before {
+    content: attr(data-label);
+    color: var(--mu);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .tabla td.celda-producto {
+    padding-top: 0;
+  }
+
+  .producto {
+    min-width: 0;
+  }
+
+  .tabla td.celda-acciones {
+    justify-content: flex-end;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+}
+
+
+/* ==========================================================================
+   7. ETIQUETAS DE ESTADO Y STOCK
+   ========================================================================== */
+
+.stock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Botones − y + junto al número */
+.paso-caja {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border: 1px solid var(--ln);
+  border-radius: 999px;
+  background: var(--bg);
+}
+
+.paso {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sf);
+  color: var(--tx);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.paso:hover {
+  background: var(--pr);
+  color: #FFFFFF;
+}
+
+.stock-valor {
+  min-width: 34px;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* Etiqueta de color según el estado del stock */
+.estado {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-ok      { background: var(--okbg);   color: var(--ok);   }
+.estado-bajo    { background: var(--warnbg); color: var(--warn); }
+.estado-agotado { background: var(--nobg);   color: var(--no);   }
+
+/* "Visible / Oculto" en el catálogo público */
+.etiqueta-vis {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mu);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.etiqueta-vis.visible {
+  color: var(--ok);
+}
+
+
+/* ==========================================================================
+   8. VENTANAS EMERGENTES
+   Usan la etiqueta <dialog> del navegador (ya incluye el cierre con Esc).
+   ========================================================================== */
+
+.ventana {
+  width: min(94vw, 640px);
+  max-height: 92vh;
+  padding: 0;
+  border: 1px solid var(--ln);
+  border-radius: 20px;
+  background: var(--sf);
+  color: var(--tx);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+}
+
+.ventana-chica {
+  width: min(94vw, 420px);
+}
+
+/* Fondo oscuro detrás de la ventana */
+.ventana::backdrop {
+  background: rgba(11, 6, 18, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.ventana-contenido {
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+  margin: 0;
+}
+
+.ventana-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--ln);
+}
+
+.ventana-cabeza h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+/* Zona con scroll: si el formulario es largo, solo esta parte se desplaza */
+.ventana-cuerpo {
+  padding: 20px 22px;
+  overflow-y: auto;
+}
+
+.ventana-pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--ln);
+}
+
+
+/* ==========================================================================
+   9. FORMULARIO DEL PRODUCTO
+   ========================================================================== */
+
+/* Zona para arrastrar o elegir la foto */
+.zona-foto {
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  border: 2px dashed var(--ln);
+  border-radius: 16px;
+  background: var(--bg);
+  color: var(--mu);
+  font-size: 0.9rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.zona-foto:hover,
+.zona-foto.arrastrando,
+.zona-foto:focus-within {
+  border-color: var(--pr);
+  background: var(--sf2);
+}
+
+.zona-foto span {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+}
+
+.zona-foto i {
+  color: var(--pr);
+  font-size: 1.8rem;
+}
+
+.zona-foto small {
+  font-size: 0.75rem;
+}
+
+/* Vista previa de la foto elegida */
+.zona-foto img {
+  width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+}
+
+/* Campos en 2 columnas (1 en celular); .completo ocupa las dos */
+.rejilla {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 600px) {
+  .rejilla {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .campo-form.completo {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Interruptor "Mostrar en el catálogo público" */
+.interruptor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid var(--ln);
+  border-radius: 14px;
+  background: var(--bg);
+  cursor: pointer;
+}
+
+.interruptor small {
+  display: block;
+  color: var(--mu);
+  font-size: 0.78rem;
+}
+
+.interruptor input {
+  position: absolute;
+  opacity: 0;
+}
+
+/* Barra del interruptor (apagado = gris, encendido = violeta) */
+.interruptor-barra {
+  position: relative;
+  flex: 0 0 46px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--ln);
+  transition: background 0.15s;
+}
+
+/* Bolita que se desplaza */
+.interruptor-barra::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  transition: transform 0.15s;
+}
+
+.interruptor input:checked + .interruptor-barra {
+  background: var(--pr);
+}
+
+.interruptor input:checked + .interruptor-barra::after {
+  transform: translateX(20px);
+}
+
+.interruptor input:focus-visible + .interruptor-barra {
+  outline: 2px solid var(--gl);
+  outline-offset: 2px;
+}
