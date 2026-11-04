@@ -129,6 +129,13 @@
 }
 
 
+/* Variante roja del aviso (errores al guardar o eliminar) */
+.alerta-error {
+  background: var(--nobg);
+  color: var(--no);
+}
+
+
 /* ==========================================================================
    3. TARJETAS DE RESUMEN
    ========================================================================== */
@@ -702,4 +709,29 @@
 .interruptor input:focus-visible + .interruptor-barra {
   outline: 2px solid var(--gl);
   outline-offset: 2px;
+}
+
+
+/* Botón "Quitar foto", debajo de la zona de la foto */
+.enlace-peligro {
+  margin: -8px 0 16px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--no);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.enlace-peligro:hover {
+  text-decoration: underline;
+}
+
+/* Botones desactivados mientras se guarda (evita clics dobles) */
+.boton:disabled,
+.paso:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }

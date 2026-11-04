@@ -2,6 +2,11 @@
 
 {% block titulo %}Inventario{% endblock %}
 
+{% block meta %}
+  <!-- Código de seguridad que el JavaScript envía en cada acción -->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
+
 {% block estilos %}
   <link rel="stylesheet" href="/css/admin/inventario.css">
 {% endblock %}
@@ -70,25 +75,25 @@
 
       <article class="dato">
         <i class="fa-solid fa-boxes-stacked"></i>
-        <strong>{{ resumen.referencias }}</strong>
+        <strong id="kpi-productos">{{ resumen.referencias }}</strong>
         <span>Productos</span>
       </article>
 
       <article class="dato">
         <i class="fa-solid fa-cubes"></i>
-        <strong>{{ resumen.unidades }}</strong>
+        <strong id="kpi-unidades">{{ resumen.unidades }}</strong>
         <span>Unidades en stock</span>
       </article>
 
-      <article class="dato {% if resumen.bajos + resumen.agotados %}dato-alerta{% endif %}">
+      <article id="tarjeta-alertas" class="dato {% if resumen.bajos + resumen.agotados %}dato-alerta{% endif %}">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        <strong>{{ resumen.bajos + resumen.agotados }}</strong>
+        <strong id="kpi-alertas">{{ resumen.bajos + resumen.agotados }}</strong>
         <span>Stock bajo o agotado</span>
       </article>
 
       <article class="dato">
         <i class="fa-solid fa-sack-dollar"></i>
-        <strong>{{ resumen.costo|cop }}</strong>
+        <strong id="kpi-costo">{{ resumen.costo|cop }}</strong>
         <span>Costo del inventario</span>
       </article>
 
@@ -169,11 +174,11 @@
               <td data-label="Stock">
                 <div class="stock">
                   <div class="paso-caja">
-                    <button class="paso" type="button" aria-label="Restar una unidad">
+                    <button class="paso" type="button" data-cambio="-1" aria-label="Restar una unidad">
                       <i class="fa-solid fa-minus"></i>
                     </button>
                     <span class="stock-valor">{{ p.stock }}</span>
-                    <button class="paso" type="button" aria-label="Sumar una unidad">
+                    <button class="paso" type="button" data-cambio="1" aria-label="Sumar una unidad">
                       <i class="fa-solid fa-plus"></i>
                     </button>
                   </div>
@@ -235,6 +240,7 @@
       <div class="ventana-cuerpo">
 
         <input type="hidden" name="id">
+        <input type="hidden" name="quitar_foto" value="">
 
         <!-- Foto: se puede arrastrar o elegir, y se ve una vista previa -->
         <label class="zona-foto" for="foto">
@@ -246,6 +252,10 @@
           </span>
         </label>
         <input id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp" class="solo-lectores">
+
+        <button id="quitar-foto" class="enlace-peligro" type="button" hidden>
+          <i class="fa-solid fa-trash"></i> Quitar foto
+        </button>
 
         <div class="rejilla">
 
@@ -311,15 +321,14 @@
           </span>
         </label>
 
-        <p id="aviso-guardado" class="alerta" hidden>
-          Vista previa: el guardado se conecta en el siguiente paso.
-        </p>
+        <!-- Mensajes de error al guardar -->
+        <p id="mensaje-form" class="alerta alerta-error" role="alert" hidden></p>
 
       </div>
 
       <div class="ventana-pie">
         <button class="boton boton-sec" type="button" data-cerrar>Cancelar</button>
-        <button class="boton" type="submit">Guardar</button>
+        <button id="btn-guardar" class="boton" type="submit">Guardar</button>
       </div>
 
     </form>
@@ -336,6 +345,7 @@
 
       <div class="ventana-cuerpo">
         <p>Vas a eliminar <strong id="nombre-eliminar"></strong>. Esta acción no se puede deshacer.</p>
+        <p id="mensaje-eliminar" class="alerta alerta-error" role="alert" hidden></p>
       </div>
 
       <div class="ventana-pie">

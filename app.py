@@ -6,13 +6,14 @@ import os
 from datetime import timedelta
 
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, jsonify
 
 # Lee el archivo .env cuando corres en tu computador (en Vercel se ignora)
 load_dotenv()
 
 from rutas.admin import admin_bp
 from rutas.catalogo import catalogo_bp
+from seguridad import token_csrf
 
 
 # public/ guarda CSS, JavaScript e imágenes (Vercel los sirve desde su CDN)
@@ -30,7 +31,17 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",                       # protege contra envíos desde otros sitios
     SESSION_COOKIE_SECURE=bool(os.environ.get("VERCEL")),  # en Vercel (https) solo viaja cifrada
     PERMANENT_SESSION_LIFETIME=timedelta(hours=8),       # la sesión dura 8 horas
+    MAX_CONTENT_LENGTH=3 * 1024 * 1024,                  # ninguna petición puede pasar de 3 MB
 )
+
+# Permite escribir {{ csrf_token() }} en las plantillas del panel
+app.jinja_env.globals["csrf_token"] = token_csrf
+
+
+# Si alguien manda algo demasiado grande (por ejemplo una foto sin reducir)
+@app.errorhandler(413)
+def archivo_muy_grande(error):
+    return jsonify(ok=False, error="La foto es demasiado grande (máximo 2 MB)."), 413
 
 
 # ----------------------------------------------------------------------------
