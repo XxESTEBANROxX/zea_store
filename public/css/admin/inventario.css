@@ -108,6 +108,20 @@
   line-height: 1.1;
 }
 
+/* Título "Inventario" en forma de imagen */
+.titulo-imagen img {
+  display: block;
+  width: min(100%, 280px);   /* en celular */
+  height: auto;
+}
+
+/* En computador se muestra más grande */
+@media (min-width: 860px) {
+  .titulo-imagen img {
+    width: 380px;            /* cambia este valor para hacerlo más grande o más pequeño */
+  }
+}
+
 .texto-suave {
   margin: 4px 0 0;
   color: var(--mu);
